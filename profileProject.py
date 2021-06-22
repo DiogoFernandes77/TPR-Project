@@ -8,6 +8,7 @@ from sklearn.decomposition import PCA
 import time
 import sys
 import warnings
+import scalogram
 
 def waitforEnter(fstop=False):
     if fstop:
@@ -202,82 +203,179 @@ plt.ylabel('Packet/sec')
 plt.show()
 waitforEnter()
 
-
-
 ## extract features
+################################################################################
+#Train features Bytes #
+train_features_b,oClass_bytes = extractFeatures(bytesNormal_train,Class=0)
 
-features_bytesNormal,oClass_bytesNormal = extractFeatures(bytesNormal_train,Class=0)
-features_bytesInfected,oClass_bytesInfected = extractFeatures(bytesInfected_train,Class=1)
-
-
-featuresBytes=np.vstack((features_bytesNormal,features_bytesInfected))
-oClassBytes=np.vstack((oClass_bytesNormal,oClass_bytesInfected))
-
-print('Train Stats FeaturesBytes Size:',featuresBytes.shape)
-
-
-features_packetNormal,oClass_packetNormal = extractFeatures(packetNormal_train,Class=0)
-features_packetInfected,oClass_packetInfected = extractFeatures(packetInfected_train,Class=1)
-
-
-featuresPacket=np.vstack((features_packetNormal,features_packetInfected))
-oClassPacket=np.vstack((oClass_packetNormal,oClass_packetInfected))
-
-print('Train Stats FeaturesPacket Size:',featuresPacket.shape)
-
+#Train features Packets #
+train_features_p,oClass_packet = extractFeatures(packetNormal_train,Class=0)
 
 plt.figure(5)
-plotFeatures(featuresBytes,oClassBytes,6,7)#0,8
+plotFeatures(train_features_b,oClass_bytes,6,7)#0,8
 
 
 plt.figure(6)
-plotFeatures(featuresPacket,oClassPacket,8,9)#0,8
+plotFeatures(train_features_p,oClass_packet,8,9)#0,8
+
+# Test features Bytes #
+test_features_b_n, oClass_bytesNormal = extractFeatures(bytesNormal_test,Class=0)
+test_features_b_i, oClass_bytesInfected = extractFeatures(bytesInfected_test,Class=1)
+
+test_features_b = np.vstack((test_features_b_n, test_features_b_i))
+
+# Test features Packets #
+test_features_p_n, oClass_bytesNormal = extractFeatures(packetNormal_test,Class=0)
+test_features_p_i, oClass_bytesInfected = extractFeatures(packetInfected_test,Class=1)
+
+test_features_p = np.vstack((test_features_p_n, test_features_p_i))
+
+print('Train Bytes Features Size:',train_features_b.shape)
+print('Train Packets Features Size:',train_features_p.shape)
+
+print('Test Bytes Features Size:',test_features_b.shape)
+print('Test Packets Features Size:',test_features_p.shape)
 
 
-## time features
+#####################################################################################
+## Train time features Bytes ##
+train_features_bS,oClass_bytesNormal = extractFeaturesSilence(bytesNormal_train,Class=0)
+
+## Train time features Packets ##
+train_features_pS,oClass_packetNormal = extractFeaturesSilence(packetNormal_train,Class=0,threshold = 4)
+
+## Test time features Bytes ##
+test_features_b_nS,oClass_bytesInfected = extractFeaturesSilence(bytesNormal_test,Class=0)
+test_features_b_iS,oClass_bytesInfected = extractFeaturesSilence(bytesInfected_test,Class=1)
+
+test_features_bS = np.vstack((test_features_b_nS, test_features_b_iS))
+
+## Test time features Packets ##
+test_features_p_nS,oClass_bytesInfected = extractFeaturesSilence(packetNormal_test,Class=0, threshold = 4)
+test_features_p_iS,oClass_bytesInfected = extractFeaturesSilence(packetInfected_test,Class=1, threshold = 4)
+
+test_features_pS = np.vstack((test_features_p_nS, test_features_p_iS))
+
+print('Train Silence Bytes Features Size:',train_features_b.shape)
+print('Train Silence Packets Features Size:',train_features_p.shape)
+
+print('Test Silence Bytes Features Size:',test_features_b.shape)
+print('Test Silence Packets Features Size:',test_features_p.shape)
+
+####################################################################################
+##  Wavelet features ##
+scales=[2,4,8,16,32,64,128,256]
+
+# Train features wavelet Bytes#
+train_features_bW,oClass_b=extractFeaturesWavelet(bytesNormal_train,scales,Class=0)
+
+# Train features wavelet Packets#
+train_features_pW,oClass_p=extractFeaturesWavelet(packetNormal_train,scales,Class=1)
+
+## Test time features Bytes ##
+test_features_b_nW,oClass_bytesInfected = extractFeaturesWavelet(bytesNormal_test,Class=0)
+test_features_b_iW,oClass_bytesInfected = extractFeaturesWavelet(bytesInfected_test,Class=1)
+
+test_features_bW = np.vstack((test_features_b_nW, test_features_b_iW))
+
+# Test features wavelet Packets#
+test_features_p_nW,oClass_p=extractFeaturesWavelet(packetNormal_test,scales,Class=0)
+test_features_p_iW,oClass_pi=extractFeaturesWavelet(packetInfected_test,scales,Class=1)
+
+test_features_pW = np.vstack((test_features_p_nW, test_features_p_iW))
+
+print('Train Wavelet Bytes Features Size:',train_features_bW.shape)
+print('Train Wavelet Packets Features Size:',train_features_pW.shape)
+
+print('Test Wavelet Bytes Features Size:',test_features_bW.shape)
+print('Test Wavelet Packets Features Size:',test_features_pW.shape)
+
+plt.figure(9)
+plotFeatures(train_features_bW,oClass_b,3,10)
+
+o3testClass=np.vstack((oClass_p, oClass_pi))
+#plt.figure(10)
+#plotFeatures(train_features_pW,oClass_p,3,10)
+
+#######################################################################################
+## Creating trainSet with normal traffic ##
+
+trainFeaturesBytes=np.hstack((train_features_b,train_features_bS,train_features_bW))
+
+trainFeaturesPackets=np.hstack((train_features_p,train_features_pS,train_features_pW))
+
+## Creating testSet ##
+testFeaturesBytes=np.hstack((test_features_b,test_features_bS,test_features_bW))
+
+testFeaturesPackets=np.hstack((test_features_p,test_features_pS,test_features_pW))
+
+#######################################################################################
+##  Normalizing features ##
+from sklearn.preprocessing import MaxAbsScaler
+
+## Normalizing train Bytes ##
+trainScalerBytes = MaxAbsScaler().fit(trainFeaturesBytes)
+trainFeaturesBytesN = trainScalerBytes.transform(trainFeaturesBytes)
+
+## Normalizing train Packets ##
+trainScalerPackets = MaxAbsScaler().fit(trainFeaturesPackets)
+trainFeaturesPacketsN = trainScalerPackets.transform(trainFeaturesPackets)
+
+## Normalizing test Bytes ##
+testScalerBytes = MaxAbsScaler().fit(testFeaturesBytes)
+testFeaturesBytesN = testScalerBytes.transform(testFeaturesBytes)
+
+## Normalizing test Packets ##
+testScalerPackets = MaxAbsScaler().fit(testFeaturesPackets)
+testFeaturesPacketsN = testScalerPackets.transform(testFeaturesPackets)
+
+####################################################################################
+## PCA Feature Reduction ##
+from sklearn.decomposition import PCA
+
+pca = PCA(n_components=3, svd_solver='full')
+
+## PCA Train Bytes##
+trainBPCA=pca.fit(trainFeaturesBytesN)
+trainFeaturesBytesNPCA = trainBPCA.transform(trainFeaturesBytesN)
+
+## PCA Train Packets ##
+
+trainBPCA=pca.fit(trainFeaturesPacketsN)
+trainFeaturesPacketsNPCA = trainBPCA.transform(trainFeaturesPacketsN)
+
+## PCA Test Bytes##
+testBPCA=pca.fit(testFeaturesBytesN)
+testFeaturesBytesNPCA = testBPCA.transform(testFeaturesBytesN)
+
+## PCA Test Packets##
+testBPCA=pca.fit(testFeaturesPacketsN)
+testFeaturesPacketsNPCA = testBPCA.transform(testFeaturesPacketsN)
 
 
+plt.figure(11)
+plotFeatures(trainFeaturesPacketsNPCA,oClass_p,0,1)
 
-features_bytesNormalS,oClass_bytesNormal = extractFeaturesSilence(bytesNormal_train,Class=0)
-features_bytesInfectedS,oClass_bytesInfected = extractFeaturesSilence(bytesInfected_train,Class=1)
+plt.figure(12)
+plotFeatures(trainFeaturesBytesNPCA,oClass_b,0,1)
 
+# -- 14 -- ##
+from sklearn import svm
 
-featuresBytesS=np.vstack((features_bytesNormalS,features_bytesInfectedS))
-oClassBytes=np.vstack((oClass_bytesNormal,oClass_bytesInfected))
+print('\n-- Anomaly Detection based on One Class Support Vector Machines (PCA Features) -- Bytes Analyze')
+ocsvm = svm.OneClassSVM(gamma='scale',kernel='linear').fit(trainFeaturesBytesNPCA)  
+rbf_ocsvm = svm.OneClassSVM(gamma='scale',kernel='rbf').fit(trainFeaturesBytesNPCA)  
+poly_ocsvm = svm. OneClassSVM(gamma='scale',kernel='poly',degree=2).fit(trainFeaturesBytesNPCA)  
 
-print('Train Silence FeaturesBytes Size:',featuresBytesS.shape)
+L1=ocsvm.predict(testFeaturesBytesNPCA)
+L2=rbf_ocsvm.predict(testFeaturesBytesNPCA)
+L3=poly_ocsvm.predict(testFeaturesBytesNPCA)
 
+AnomResults={-1:"Anomaly",1:"OK"}
 
-features_packetNormalS,oClass_packetNormal = extractFeaturesSilence(packetNormal_train,Class=0,threshold = 4)
-features_packetInfectedS,oClass_packetInfected = extractFeaturesSilence(packetInfected_train,Class=1)
-
-
-featuresPacketS=np.vstack((features_packetNormalS,features_packetInfectedS))
-oClassPacket=np.vstack((oClass_packetNormal,oClass_packetInfected))
-
-print('Train Silence FeaturesPacket Size:',featuresPacketS.shape)
-
-
-plt.figure(7)
-plotFeatures(featuresBytesS,oClassBytes,0,1)#0,8
-
-
-plt.figure(8)
-plotFeatures(featuresPacketS,oClassPacket,1,2)#0,8
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+nObsTest,nFea=testFeaturesBytesNPCA.shape
+for i in range(nObsTest):
+    print('Obs: {:2} ({:<8}): Kernel Linear->{:<10} | Kernel RBF->{:<10} | Kernel Poly->{:<10}'.format(i,Classes[o3testClass[i][0]],AnomResults[L1[i]],AnomResults[L2[i]],AnomResults[L3[i]]))
 
 
 
