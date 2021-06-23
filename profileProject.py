@@ -32,7 +32,7 @@ def plot3Classes(data1,name1,data2,name2):
     waitforEnter()
     
 ## -- 2 -- ##
-def breakTrainTest(data,oWnd=30,trainPerc=0.5):
+def breakTrainTest(data,oWnd=10,trainPerc=0.5):
     nSamp,nCols=data.shape
     nObs=int(nSamp/oWnd)
     data_obs=data[:nObs*oWnd,:].reshape((nObs,oWnd,nCols))
@@ -147,8 +147,8 @@ def distance(c,p):
 Classes={0:'Normal',1:'Infected'}
 
 plt.ion()
-normal=np.loadtxt('dataSetRefinedTabuas.dat')
-infected = np.loadtxt('dataSetRefinedInfected.dat')
+normal=np.loadtxt('normal_test.dat')
+infected = np.loadtxt('infected_test.dat')
 
 bytesNormal = np.array(normal[:,[2,4]])
 bytesInfected = np.array(infected[:,[2,4]])
@@ -212,11 +212,11 @@ train_features_b,oClass_bytes = extractFeatures(bytesNormal_train,Class=0)
 train_features_p,oClass_packet = extractFeatures(packetNormal_train,Class=0)
 
 plt.figure(5)
-plotFeatures(train_features_b,oClass_bytes,6,7)#0,8
+plotFeatures(train_features_b,oClass_bytes,0,1)#0,8
 
 
 plt.figure(6)
-plotFeatures(train_features_p,oClass_packet,8,9)#0,8
+plotFeatures(train_features_p,oClass_packet,0,1)#0,8
 
 # Test features Bytes #
 test_features_b_n, oClass_bytesNormal = extractFeatures(bytesNormal_test,Class=0)
@@ -362,6 +362,8 @@ plotFeatures(trainFeaturesBytesNPCA,oClass_b,0,1)
 # -- 14 -- ##
 from sklearn import svm
 
+# ##WITH PCA
+# MACHINE LEARNING FOR BYTES
 print('\n-- Anomaly Detection based on One Class Support Vector Machines (PCA Features) -- Bytes Analyze')
 ocsvm = svm.OneClassSVM(gamma='scale',kernel='linear').fit(trainFeaturesBytesNPCA)  
 rbf_ocsvm = svm.OneClassSVM(gamma='scale',kernel='rbf').fit(trainFeaturesBytesNPCA)  
@@ -376,6 +378,47 @@ AnomResults={-1:"Anomaly",1:"OK"}
 nObsTest,nFea=testFeaturesBytesNPCA.shape
 for i in range(nObsTest):
     print('Obs: {:2} ({:<8}): Kernel Linear->{:<10} | Kernel RBF->{:<10} | Kernel Poly->{:<10}'.format(i,Classes[o3testClass[i][0]],AnomResults[L1[i]],AnomResults[L2[i]],AnomResults[L3[i]]))
+
+
+## MACHINE LEARNING FOR PACKETS
+print('\n-- Anomaly Detection based on One Class Support Vector Machines (PCA Features) -- Bytes Analyze')
+ocsvm = svm.OneClassSVM(gamma='scale',kernel='linear').fit(trainFeaturesPacketsNPCA)  
+rbf_ocsvm = svm.OneClassSVM(gamma='scale',kernel='rbf').fit(trainFeaturesPacketsNPCA)  
+poly_ocsvm = svm. OneClassSVM(gamma='scale',kernel='poly',degree=2).fit(trainFeaturesPacketsNPCA)  
+
+L1=ocsvm.predict(testFeaturesPacketsNPCA)
+L2=rbf_ocsvm.predict(testFeaturesPacketsNPCA)
+L3=poly_ocsvm.predict(testFeaturesPacketsNPCA)
+
+AnomResults={-1:"Anomaly",1:"OK"}
+
+nObsTest,nFea=testFeaturesPacketsNPCA.shape
+for i in range(nObsTest):
+    print('Obs: {:2} ({:<8}): Kernel Linear->{:<10} | Kernel RBF->{:<10} | Kernel Poly->{:<10}'.format(i,Classes[o3testClass[i][0]],AnomResults[L1[i]],AnomResults[L2[i]],AnomResults[L3[i]]))
+
+
+
+
+# #WITHOUT PCA
+# MACHINE LEARNING FOR BYTES
+# print('\n-- Anomaly Detection based on One Class Support Vector Machines (PCA Features) -- Bytes Analyze')
+# ocsvm = svm.OneClassSVM(gamma='scale',kernel='linear').fit(trainFeaturesBytesN)  
+# rbf_ocsvm = svm.OneClassSVM(gamma='scale',kernel='rbf').fit(trainFeaturesBytesN)  
+# poly_ocsvm = svm. OneClassSVM(gamma='scale',kernel='poly',degree=2).fit(trainFeaturesBytesN)  
+
+# L1=ocsvm.predict(testFeaturesBytes)
+# L2=rbf_ocsvm.predict(testFeaturesBytes)
+# L3=poly_ocsvm.predict(testFeaturesBytes)
+
+# AnomResults={-1:"Anomaly",1:"OK"}
+
+# nObsTest,nFea=testFeaturesBytes.shape
+# for i in range(nObsTest):
+#     print('Obs: {:2} ({:<8}): Kernel Linear->{:<10} | Kernel RBF->{:<10} | Kernel Poly->{:<10}'.format(i,Classes[o3testClass[i][0]],AnomResults[L1[i]],AnomResults[L2[i]],AnomResults[L3[i]]))
+
+
+
+
 
 
 
