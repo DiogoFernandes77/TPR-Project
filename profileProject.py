@@ -32,7 +32,7 @@ def plot3Classes(data1,name1,data2,name2):
     waitforEnter()
     
 ## -- 2 -- ##
-def breakTrainTest(data,oWnd=10,trainPerc=0.5):
+def breakTrainTest(data,oWnd=50,trainPerc=0.5):
     nSamp,nCols=data.shape
     nObs=int(nSamp/oWnd)
     data_obs=data[:nObs*oWnd,:].reshape((nObs,oWnd,nCols))
@@ -147,8 +147,8 @@ def distance(c,p):
 Classes={0:'Normal',1:'Infected'}
 
 plt.ion()
-normal=np.loadtxt('normal_test.dat')
-infected = np.loadtxt('infected_test.dat')
+normal=np.loadtxt('normal.dat')
+infected = np.loadtxt('infected.dat')
 
 bytesNormal = np.array(normal[:,[2,4]])
 bytesInfected = np.array(infected[:,[2,4]])
@@ -239,14 +239,14 @@ print('Test Packets Features Size:',test_features_p.shape)
 
 #####################################################################################
 ## Train time features Bytes ##
-train_features_bS,oClass_bytesNormal = extractFeaturesSilence(bytesNormal_train,Class=0)
+train_features_bS,oClass_bytesNormal = extractFeaturesSilence(bytesNormal_train,Class=0, threshold=128)
 
 ## Train time features Packets ##
 train_features_pS,oClass_packetNormal = extractFeaturesSilence(packetNormal_train,Class=0,threshold = 4)
 
 ## Test time features Bytes ##
-test_features_b_nS,oClass_bytesInfected = extractFeaturesSilence(bytesNormal_test,Class=0)
-test_features_b_iS,oClass_bytesInfected = extractFeaturesSilence(bytesInfected_test,Class=1)
+test_features_b_nS,oClass_bytesInfected = extractFeaturesSilence(bytesNormal_test,Class=0, threshold=128)
+test_features_b_iS,oClass_bytesInfected = extractFeaturesSilence(bytesInfected_test,Class=1, threshold=128)
 
 test_features_bS = np.vstack((test_features_b_nS, test_features_b_iS))
 
@@ -273,8 +273,8 @@ train_features_bW,oClass_b=extractFeaturesWavelet(bytesNormal_train,scales,Class
 train_features_pW,oClass_p=extractFeaturesWavelet(packetNormal_train,scales,Class=1)
 
 ## Test time features Bytes ##
-test_features_b_nW,oClass_bytesInfected = extractFeaturesWavelet(bytesNormal_test,Class=0)
-test_features_b_iW,oClass_bytesInfected = extractFeaturesWavelet(bytesInfected_test,Class=1)
+test_features_b_nW,oClass_b = extractFeaturesWavelet(bytesNormal_test,scales,Class=0)
+test_features_b_iW,oClass_bi = extractFeaturesWavelet(bytesInfected_test,scales,Class=1)
 
 test_features_bW = np.vstack((test_features_b_nW, test_features_b_iW))
 
@@ -293,7 +293,8 @@ print('Test Wavelet Packets Features Size:',test_features_pW.shape)
 plt.figure(9)
 plotFeatures(train_features_bW,oClass_b,3,10)
 
-o3testClass=np.vstack((oClass_p, oClass_pi))
+o3testClassB=np.vstack((oClass_b, oClass_bi))
+o3testClassP=np.vstack((oClass_p, oClass_pi))
 #plt.figure(10)
 #plotFeatures(train_features_pW,oClass_p,3,10)
 
@@ -362,7 +363,7 @@ plotFeatures(trainFeaturesBytesNPCA,oClass_b,0,1)
 # -- 14 -- ##
 from sklearn import svm
 
-# ##WITH PCA
+##WITH PCA
 # MACHINE LEARNING FOR BYTES
 print('\n-- Anomaly Detection based on One Class Support Vector Machines (PCA Features) -- Bytes Analyze')
 ocsvm = svm.OneClassSVM(gamma='scale',kernel='linear').fit(trainFeaturesBytesNPCA)  
@@ -376,9 +377,12 @@ L3=poly_ocsvm.predict(testFeaturesBytesNPCA)
 AnomResults={-1:"Anomaly",1:"OK"}
 
 nObsTest,nFea=testFeaturesBytesNPCA.shape
-for i in range(nObsTest):
-    print('Obs: {:2} ({:<8}): Kernel Linear->{:<10} | Kernel RBF->{:<10} | Kernel Poly->{:<10}'.format(i,Classes[o3testClass[i][0]],AnomResults[L1[i]],AnomResults[L2[i]],AnomResults[L3[i]]))
+# for i in range(nObsTest):
+#     print('Obs: {:2} ({:<8}): Kernel Linear->{:<10} | Kernel RBF->{:<10} | Kernel Poly->{:<10}'.format(i,Classes[o3testClassB[i][0]],AnomResults[L1[i]],AnomResults[L2[i]],AnomResults[L3[i]]))
 
+B1 =L1
+B2= L2
+B3=L3
 
 ## MACHINE LEARNING FOR PACKETS
 print('\n-- Anomaly Detection based on One Class Support Vector Machines (PCA Features) -- Bytes Analyze')
@@ -393,28 +397,32 @@ L3=poly_ocsvm.predict(testFeaturesPacketsNPCA)
 AnomResults={-1:"Anomaly",1:"OK"}
 
 nObsTest,nFea=testFeaturesPacketsNPCA.shape
-for i in range(nObsTest):
-    print('Obs: {:2} ({:<8}): Kernel Linear->{:<10} | Kernel RBF->{:<10} | Kernel Poly->{:<10}'.format(i,Classes[o3testClass[i][0]],AnomResults[L1[i]],AnomResults[L2[i]],AnomResults[L3[i]]))
-
-
-
-
-# #WITHOUT PCA
-# MACHINE LEARNING FOR BYTES
-# print('\n-- Anomaly Detection based on One Class Support Vector Machines (PCA Features) -- Bytes Analyze')
-# ocsvm = svm.OneClassSVM(gamma='scale',kernel='linear').fit(trainFeaturesBytesN)  
-# rbf_ocsvm = svm.OneClassSVM(gamma='scale',kernel='rbf').fit(trainFeaturesBytesN)  
-# poly_ocsvm = svm. OneClassSVM(gamma='scale',kernel='poly',degree=2).fit(trainFeaturesBytesN)  
-
-# L1=ocsvm.predict(testFeaturesBytes)
-# L2=rbf_ocsvm.predict(testFeaturesBytes)
-# L3=poly_ocsvm.predict(testFeaturesBytes)
-
-# AnomResults={-1:"Anomaly",1:"OK"}
-
-# nObsTest,nFea=testFeaturesBytes.shape
 # for i in range(nObsTest):
-#     print('Obs: {:2} ({:<8}): Kernel Linear->{:<10} | Kernel RBF->{:<10} | Kernel Poly->{:<10}'.format(i,Classes[o3testClass[i][0]],AnomResults[L1[i]],AnomResults[L2[i]],AnomResults[L3[i]]))
+#     print('Obs: {:2} ({:<8}): Kernel Linear->{:<10} | Kernel RBF->{:<10} | Kernel Poly->{:<10}'.format(i,Classes[o3testClassP[i][0]],AnomResults[L1[i]],AnomResults[L2[i]],AnomResults[L3[i]]))
+
+print('\n-- Ensemble -- ')
+print('\n-- with poly -- ')
+for i in range(nObsTest):
+    R1=B1[i]+L1[i]+B2[i]+L2[i]+B3[i]+L3[i]
+    
+    if(R1 == -6 or R1 == -4 or R1 == -2):
+        R1=-1
+    else:
+        R1=1
+        
+    print('Obs: {:2} ({:<8}): Result->{:<10}'.format(i,Classes[o3testClassP[i][0]],AnomResults[R1]))
+
+print('\n-- no poly -- ')
+for i in range(nObsTest):
+    R1=B1[i]+L1[i]+B2[i]+L2[i]
+    
+    if(R1 == -4 or R1 == -2):
+        R1=-1
+    else:
+        R1=1
+        
+    print('Obs: {:2} ({:<8}): Result->{:<10}'.format(i,Classes[o3testClassP[i][0]],AnomResults[R1]))
+
 
 
 
