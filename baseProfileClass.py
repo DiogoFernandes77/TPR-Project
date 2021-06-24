@@ -406,22 +406,22 @@ for i in range(nObsTest):
 
 
 # ## -- 14 -- ##
-# from sklearn import svm
+from sklearn import svm
 
-# print('\n-- Anomaly Detection based on One Class Support Vector Machines (PCA Features) --')
-# ocsvm = svm.OneClassSVM(gamma='scale',kernel='linear').fit(i2trainFeaturesNPCA)  
-# rbf_ocsvm = svm.OneClassSVM(gamma='scale',kernel='rbf').fit(i2trainFeaturesNPCA)  
-# poly_ocsvm = svm. OneClassSVM(gamma='scale',kernel='poly',degree=2).fit(i2trainFeaturesNPCA)  
+print('\n-- Anomaly Detection based on One Class Support Vector Machines (PCA Features) --')
+ocsvm = svm.OneClassSVM(gamma='scale',kernel='linear').fit(i2trainFeaturesNPCA)  
+rbf_ocsvm = svm.OneClassSVM(gamma='scale',kernel='rbf').fit(i2trainFeaturesNPCA)  
+poly_ocsvm = svm. OneClassSVM(gamma='scale',kernel='poly',degree=2).fit(i2trainFeaturesNPCA)  
 
-# L1=ocsvm.predict(i3AtestFeaturesNPCA)
-# L2=rbf_ocsvm.predict(i3AtestFeaturesNPCA)
-# L3=poly_ocsvm.predict(i3AtestFeaturesNPCA)
+L1=ocsvm.predict(i3AtestFeaturesNPCA)
+L2=rbf_ocsvm.predict(i3AtestFeaturesNPCA)
+L3=poly_ocsvm.predict(i3AtestFeaturesNPCA)
 
-# AnomResults={-1:"Anomaly",1:"OK"}
+AnomResults={-1:"Anomaly",1:"OK"}
 
-# nObsTest,nFea=i3AtestFeaturesNPCA.shape
-# for i in range(nObsTest):
-#     print('Obs: {:2} ({:<8}): Kernel Linear->{:<10} | Kernel RBF->{:<10} | Kernel Poly->{:<10}'.format(i,Classes[o3testClass[i][0]],AnomResults[L1[i]],AnomResults[L2[i]],AnomResults[L3[i]]))
+nObsTest,nFea=i3AtestFeaturesNPCA.shape
+for i in range(nObsTest):
+    print('Obs: {:2} ({:<8}): Kernel Linear->{:<10} | Kernel RBF->{:<10} | Kernel Poly->{:<10}'.format(i,Classes[o3testClass[i][0]],AnomResults[L1[i]],AnomResults[L2[i]],AnomResults[L3[i]]))
 
 # ## -- 15 -- ##
 # from sklearn import svm

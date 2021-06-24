@@ -148,7 +148,7 @@ Classes={0:'Normal',1:'Infected'}
 
 plt.ion()
 normal=np.loadtxt('normal.dat')
-infected = np.loadtxt('infected.dat')
+infected = np.loadtxt('infectedMode4Big.dat')
 
 bytesNormal = np.array(normal[:,[2,4]])
 bytesInfected = np.array(infected[:,[2,4]])
@@ -212,11 +212,11 @@ train_features_b,oClass_bytes = extractFeatures(bytesNormal_train,Class=0)
 train_features_p,oClass_packet = extractFeatures(packetNormal_train,Class=0)
 
 plt.figure(5)
-plotFeatures(train_features_b,oClass_bytes,0,1)#0,8
+plotFeatures(train_features_b,oClass_bytes,1,3)#0,8
 
 
 plt.figure(6)
-plotFeatures(train_features_p,oClass_packet,0,1)#0,8
+plotFeatures(train_features_p,oClass_packet,0,2)#0,8
 
 # Test features Bytes #
 test_features_b_n, oClass_bytesNormal = extractFeatures(bytesNormal_test,Class=0)
@@ -256,11 +256,11 @@ test_features_p_iS,oClass_bytesInfected = extractFeaturesSilence(packetInfected_
 
 test_features_pS = np.vstack((test_features_p_nS, test_features_p_iS))
 
-print('Train Silence Bytes Features Size:',train_features_b.shape)
-print('Train Silence Packets Features Size:',train_features_p.shape)
+print('Train Silence Bytes Features Size:',train_features_bS.shape)
+print('Train Silence Packets Features Size:',train_features_pS.shape)
 
-print('Test Silence Bytes Features Size:',test_features_b.shape)
-print('Test Silence Packets Features Size:',test_features_p.shape)
+print('Test Silence Bytes Features Size:',test_features_bS.shape)
+print('Test Silence Packets Features Size:',test_features_pS.shape)
 
 ####################################################################################
 ##  Wavelet features ##
@@ -330,6 +330,11 @@ testFeaturesBytesN = testScalerBytes.transform(testFeaturesBytes)
 testScalerPackets = MaxAbsScaler().fit(testFeaturesPackets)
 testFeaturesPacketsN = testScalerPackets.transform(testFeaturesPackets)
 
+
+
+print('Test Normalized Packets Features Size:',trainFeaturesBytesN.shape)
+
+
 ####################################################################################
 ## PCA Feature Reduction ##
 from sklearn.decomposition import PCA
@@ -353,12 +358,12 @@ testFeaturesBytesNPCA = testBPCA.transform(testFeaturesBytesN)
 testBPCA=pca.fit(testFeaturesPacketsN)
 testFeaturesPacketsNPCA = testBPCA.transform(testFeaturesPacketsN)
 
-
+print('Train Reduction Packets Features Size:',trainFeaturesBytesNPCA.shape)
 plt.figure(11)
 plotFeatures(trainFeaturesPacketsNPCA,oClass_p,0,1)
 
 plt.figure(12)
-plotFeatures(trainFeaturesBytesNPCA,oClass_b,0,1)
+plotFeatures(trainFeaturesBytesNPCA,oClass_b,0,2)
 
 # -- 14 -- ##
 from sklearn import svm
