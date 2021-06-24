@@ -382,8 +382,8 @@ L3=poly_ocsvm.predict(testFeaturesBytesNPCA)
 AnomResults={-1:"Anomaly",1:"OK"}
 
 nObsTest,nFea=testFeaturesBytesNPCA.shape
-# for i in range(nObsTest):
-#     print('Obs: {:2} ({:<8}): Kernel Linear->{:<10} | Kernel RBF->{:<10} | Kernel Poly->{:<10}'.format(i,Classes[o3testClassB[i][0]],AnomResults[L1[i]],AnomResults[L2[i]],AnomResults[L3[i]]))
+for i in range(nObsTest):
+    print('Obs: {:2} ({:<8}): Kernel Linear->{:<10} | Kernel RBF->{:<10} | Kernel Poly->{:<10}'.format(i,Classes[o3testClassB[i][0]],AnomResults[L1[i]],AnomResults[L2[i]],AnomResults[L3[i]]))
 
 B1 =L1
 B2= L2
@@ -402,8 +402,8 @@ L3=poly_ocsvm.predict(testFeaturesPacketsNPCA)
 AnomResults={-1:"Anomaly",1:"OK"}
 
 nObsTest,nFea=testFeaturesPacketsNPCA.shape
-# for i in range(nObsTest):
-#     print('Obs: {:2} ({:<8}): Kernel Linear->{:<10} | Kernel RBF->{:<10} | Kernel Poly->{:<10}'.format(i,Classes[o3testClassP[i][0]],AnomResults[L1[i]],AnomResults[L2[i]],AnomResults[L3[i]]))
+for i in range(nObsTest):
+    print('Obs: {:2} ({:<8}): Kernel Linear->{:<10} | Kernel RBF->{:<10} | Kernel Poly->{:<10}'.format(i,Classes[o3testClassP[i][0]],AnomResults[L1[i]],AnomResults[L2[i]],AnomResults[L3[i]]))
 
 print('\n-- Ensemble -- ')
 print('\n-- with poly -- ')
