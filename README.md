@@ -7,8 +7,8 @@ Detectar comportamento anómalo, neste caso um bot no qual faz exfiltração de 
 
 
 
-##English
-##Grade 16,9/20
+## English
+## Grade 16,9/20
 Detect anomalous behavior, in this case a bot which exfiltrates a database, in a network using machine learning.
 
 
